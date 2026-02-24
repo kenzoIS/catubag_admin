@@ -1,0 +1,641 @@
+package com.example.adminlogin
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                var currentScreen by remember { mutableStateOf("login") }
+
+                when (currentScreen) {
+                    "login" -> LoginScreen(onForgotPasswordClick = { currentScreen = "forgot_password" })
+                    "forgot_password" -> ForgotPasswordScreen(
+                        onBackToLogin = { currentScreen = "login" },
+                        onSendResetLink = { currentScreen = "otp" }
+                    )
+                    "otp" -> OTPScreen(
+                        onBackToLogin = { currentScreen = "login" },
+                        onContinue = { currentScreen = "new_password" }
+                    )
+                    "new_password" -> NewPasswordScreen(
+                        onBackToLogin = { currentScreen = "login" },
+                        onSavePassword = { currentScreen = "login" }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LoginScreen(onForgotPasswordClick: () -> Unit) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xFF1A1A1A))) {
+
+        // --- Top Header Section with Image ---
+        Box(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.35f)) {
+
+            Image(
+                painter = painterResource(id = R.drawable.login_bg),
+                contentDescription = "Background",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+
+            // The Reddish Tint Overlay
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF8B5A5A).copy(alpha = 0.5f))
+            )
+
+            // App Logo
+            Image(
+                painter = painterResource(id = R.drawable.logo_h),
+                contentDescription = "App Logo",
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 15.dp, bottom = 50.dp)
+                    .size(70.dp)
+            )
+        }
+
+        // --- Bottom Sheet Section ---
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.7f)
+                .align(Alignment.BottomCenter),
+            shape = RoundedCornerShape(topStart = 35.dp, topEnd = 35.dp),
+            color = Color(0xFFFCFCFC)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 30.dp, vertical = 40.dp)
+            ) {
+                Text(
+                    text = "Welcome, Admin!",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(bottom = 40.dp)
+                )
+
+                Text(
+                    text = "Login to continue",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(bottom = 15.dp)
+                )
+
+                // --- Email Input ---
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Enter your email") },
+                    leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email", tint = Color.Gray) },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 15.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color(0xFFF5F5F5),
+                        unfocusedContainerColor = Color(0xFFF5F5F5),
+                        focusedBorderColor = Color.Black,
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedLabelColor = Color.Black,
+                        unfocusedLabelColor = Color.Gray
+                    ),
+                    singleLine = true
+                )
+
+                // --- Password Input ---
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Enter your Password") },
+                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password", tint = Color.Gray) },
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 15.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color(0xFFF5F5F5),
+                        unfocusedContainerColor = Color(0xFFF5F5F5),
+                        focusedBorderColor = Color.Black,
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedLabelColor = Color.Black,
+                        unfocusedLabelColor = Color.Gray
+                    ),
+                    singleLine = true
+                )
+
+                // --- Forgot Password ---
+                Text(
+                    text = "Forgot Password?",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.DarkGray,
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .padding(bottom = 30.dp)
+                        .clickable { onForgotPasswordClick() }
+                )
+
+                // --- Login Button ---
+                Button(
+                    onClick = { /* Handle Login Action */ },
+                    modifier = Modifier
+                        .fillMaxWidth(0.6f)
+                        .height(55.dp)
+                        .align(Alignment.CenterHorizontally),
+                    shape = RoundedCornerShape(25.dp),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 8.dp,
+                        pressedElevation = 2.dp
+                    ),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2A2A2A))
+                ) {
+                    Text("Login", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ForgotPasswordScreen(onBackToLogin: () -> Unit, onSendResetLink: () -> Unit) {
+    var contactInfo by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xFF1A1A1A))) {
+
+        // --- Top Header Section with Image ---
+        Box(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.35f)) {
+            Image(
+                painter = painterResource(id = R.drawable.forgotpassword),
+                contentDescription = "Background",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+
+            // The Reddish Tint Overlay
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF8B5A5A).copy(alpha = 0.5f))
+            )
+
+            // App Logo
+            Image(
+                painter = painterResource(id = R.drawable.logo_h),
+                contentDescription = "App Logo",
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 15.dp, bottom = 200.dp)
+                    .size(70.dp)
+            )
+        }
+
+        // --- Bottom Sheet Section ---
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.9f)
+                .align(Alignment.BottomCenter),
+            shape = RoundedCornerShape(topStart = 35.dp, topEnd = 35.dp),
+            color = Color(0xFFFCFCFC)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 30.dp, vertical = 40.dp)
+            ) {
+                Text(
+                    text = "Forgot Password",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(bottom = 10.dp)
+                )
+
+                Text(
+                    text = "Find your account.",
+                    fontSize = 16.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(bottom = 30.dp)
+                )
+
+                // --- Email/Phone Input ---
+                OutlinedTextField(
+                    value = contactInfo,
+                    onValueChange = { 
+                        // Restriction: If input is numeric, limit to 11 digits
+                        if (it.all { char -> char.isDigit() }) {
+                            if (it.length <= 11) {
+                                contactInfo = it
+                                errorMessage = null
+                            }
+                        } else {
+                            contactInfo = it
+                            errorMessage = null
+                        }
+                    },
+                    label = { Text("Enter your email or phone number") },
+                    leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email", tint = Color.Gray) },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    isError = errorMessage != null,
+                    supportingText = {
+                        if (errorMessage != null) {
+                            Text(text = errorMessage!!, color = MaterialTheme.colorScheme.error)
+                        }
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color(0xFFF5F5F5),
+                        unfocusedContainerColor = Color(0xFFF5F5F5),
+                        focusedBorderColor = Color.Black,
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedLabelColor = Color.Black,
+                        unfocusedLabelColor = Color.Gray
+                    ),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // --- Reset Button ---
+                Button(
+                    onClick = { 
+                        val isNumeric = contactInfo.all { it.isDigit() } && contactInfo.isNotEmpty()
+                        if (isNumeric && contactInfo.length != 11) {
+                            errorMessage = "Phone number must be 11 numbers"
+                        } else if (contactInfo.isEmpty()) {
+                            errorMessage = "Please enter your email or phone number"
+                        } else {
+                            onSendResetLink() 
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(0.7f)
+                        .height(55.dp)
+                        .align(Alignment.CenterHorizontally),
+                    shape = RoundedCornerShape(25.dp),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 8.dp
+                    ),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2A2A2A))
+                ) {
+                    Text("Send Reset Link", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // --- Back to Login ---
+                Text(
+                    text = "Back to Login",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.DarkGray,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .clickable { onBackToLogin() }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun OTPScreen(onBackToLogin: () -> Unit, onContinue: () -> Unit) {
+    var otpValue by remember { mutableStateOf("") }
+    val focusRequesters = List(4) { FocusRequester() }
+
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xFF1A1A1A))) {
+
+        // --- Top Header Section ---
+        Box(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.35f)) {
+            Image(
+                painter = painterResource(id = R.drawable.forgotpassword),
+                contentDescription = "Background",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF8B5A5A).copy(alpha = 0.5f))
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.logo_h),
+                contentDescription = "App Logo",
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 15.dp, bottom = 200.dp)
+                    .size(70.dp)
+            )
+        }
+
+        // --- Bottom Sheet Section ---
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.9f)
+                .align(Alignment.BottomCenter),
+            shape = RoundedCornerShape(topStart = 35.dp, topEnd = 35.dp),
+            color = Color(0xFFFCFCFC)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 30.dp, vertical = 40.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Verification Code",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.align(Alignment.Start).padding(bottom = 10.dp)
+                )
+
+                Text(
+                    text = "Enter the 4-digit code sent to your email or phone number.",
+                    fontSize = 16.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.align(Alignment.Start).padding(bottom = 40.dp)
+                )
+
+                // --- 4 OTP Boxes ---
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 40.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    for (i in 0 until 4) {
+                        OutlinedTextField(
+                            value = if (otpValue.length > i) otpValue[i].toString() else "",
+                            onValueChange = { newValue ->
+                                if (newValue.length <= 1) {
+                                    val currentOTP = otpValue.toCharArray().toMutableList()
+                                    if (newValue.isNotEmpty()) {
+                                        if (i < otpValue.length) {
+                                            currentOTP[i] = newValue[0]
+                                        } else {
+                                            currentOTP.add(newValue[0])
+                                        }
+                                        if (i < 3) focusRequesters[i + 1].requestFocus()
+                                    } else {
+                                        if (i < otpValue.length) {
+                                            currentOTP.removeAt(i)
+                                        }
+                                        if (i > 0) focusRequesters[i - 1].requestFocus()
+                                    }
+                                    otpValue = currentOTP.joinToString("")
+                                }
+                            },
+                            modifier = Modifier
+                                .size(60.dp)
+                                .focusRequester(focusRequesters[i]),
+                            textStyle = TextStyle(
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
+                            ),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = Color(0xFFF5F5F5),
+                                unfocusedContainerColor = Color(0xFFF5F5F5),
+                                focusedBorderColor = Color.Black,
+                                unfocusedBorderColor = Color.Gray.copy(alpha = 0.3f)
+                            ),
+                            singleLine = true
+                        )
+                    }
+                }
+
+                // --- Continue Button ---
+                Button(
+                    onClick = { onContinue() },
+                    modifier = Modifier
+                        .fillMaxWidth(0.7f)
+                        .height(55.dp),
+                    shape = RoundedCornerShape(25.dp),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2A2A2A))
+                ) {
+                    Text("Continue", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = "Resend Code",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.clickable { /* Handle resend */ }
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Text(
+                    text = "Back to Login",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.DarkGray,
+                    modifier = Modifier
+                        .clickable { onBackToLogin() }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun NewPasswordScreen(onBackToLogin: () -> Unit, onSavePassword: () -> Unit) {
+    var newPassword by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xFF1A1A1A))) {
+
+        // --- Top Header Section ---
+        Box(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.35f)) {
+            Image(
+                painter = painterResource(id = R.drawable.forgotpassword),
+                contentDescription = "Background",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF8B5A5A).copy(alpha = 0.5f))
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.logo_h),
+                contentDescription = "App Logo",
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 15.dp, bottom = 200.dp)
+                    .size(70.dp)
+            )
+        }
+
+        // --- Bottom Sheet Section ---
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.9f)
+                .align(Alignment.BottomCenter),
+            shape = RoundedCornerShape(topStart = 35.dp, topEnd = 35.dp),
+            color = Color(0xFFFCFCFC)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 30.dp, vertical = 40.dp)
+            ) {
+                Text(
+                    text = "New Password",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(bottom = 10.dp)
+                )
+
+                Text(
+                    text = "Set your new password below.",
+                    fontSize = 16.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(bottom = 30.dp)
+                )
+
+                // --- New Password Input ---
+                OutlinedTextField(
+                    value = newPassword,
+                    onValueChange = { 
+                        newPassword = it 
+                        errorMessage = null
+                    },
+                    label = { Text("Enter your New Password") },
+                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Lock", tint = Color.Gray) },
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 15.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    isError = errorMessage != null,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color(0xFFF5F5F5),
+                        unfocusedContainerColor = Color(0xFFF5F5F5),
+                        focusedBorderColor = Color.Black,
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedLabelColor = Color.Black,
+                        unfocusedLabelColor = Color.Gray
+                    ),
+                    singleLine = true
+                )
+
+                // --- Confirm Password Input ---
+                OutlinedTextField(
+                    value = confirmPassword,
+                    onValueChange = { 
+                        confirmPassword = it 
+                        errorMessage = null
+                    },
+                    label = { Text("Confirm your New Password") },
+                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Lock", tint = Color.Gray) },
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    isError = errorMessage != null,
+                    supportingText = {
+                        if (errorMessage != null) {
+                            Text(text = errorMessage!!, color = MaterialTheme.colorScheme.error)
+                        }
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color(0xFFF5F5F5),
+                        unfocusedContainerColor = Color(0xFFF5F5F5),
+                        focusedBorderColor = Color.Black,
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedLabelColor = Color.Black,
+                        unfocusedLabelColor = Color.Gray
+                    ),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // --- Save Button ---
+                Button(
+                    onClick = { 
+                        if (newPassword.isEmpty() || confirmPassword.isEmpty()) {
+                            errorMessage = "Please enter both password fields"
+                        } else if (newPassword != confirmPassword) {
+                            errorMessage = "Passwords do not match"
+                        } else {
+                            onSavePassword() 
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(0.7f)
+                        .height(55.dp)
+                        .align(Alignment.CenterHorizontally),
+                    shape = RoundedCornerShape(25.dp),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2A2A2A))
+                ) {
+                    Text("Save Password", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                // --- Back to Login ---
+                Text(
+                    text = "Back to Login",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.DarkGray,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .clickable { onBackToLogin() }
+                )
+            }
+        }
+    }
+}
