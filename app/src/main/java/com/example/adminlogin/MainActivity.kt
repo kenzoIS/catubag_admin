@@ -3,6 +3,8 @@ package com.example.adminlogin
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -21,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,38 +41,63 @@ fun LoginScreen() {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+    // --- CAROUSEL SETUP ---
+    // IMPORTANT: Change these to match the exact names of your 4 files in the drawable folder!
+    val bgImages = listOf(
+        R.drawable.login_bg, // Image 1
+        R.drawable.login_bg1,      // Image 2
+        R.drawable.login_bg2,      // Image 3
+        R.drawable.login_bg3       // Image 4
+    )
+
+    var currentImageIndex by remember { mutableIntStateOf(0) }
+
+    // This creates the automatic timer loop
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(3000) // Waits 3 seconds before changing the image (adjust as you like!)
+            currentImageIndex = (currentImageIndex + 1) % bgImages.size
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF1A1A1A))) {
 
-        // --- Top Header Section with Image ---
+        // --- 1. Top Header Section (Carousel Background) ---
         Box(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.45f)) {
 
-            // IMPORTANT: Make sure 'login_bg' matches your image file name exactly
-            Image(
-                painter = painterResource(id = R.drawable.login_bg),
-                contentDescription = "Background",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
+            // The Crossfade smoothly animates the transition between the images
+            Crossfade(
+                targetState = bgImages[currentImageIndex],
+                animationSpec = tween(durationMillis = 1000), // 1 second fade animation
+                label = "Background Carousel"
+            ) { targetImage ->
+                Image(
+                    painter = painterResource(id = targetImage),
+                    contentDescription = "Background",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
 
-            // The Reddish Tint Overlay
+            // Reddish Tint Overlay
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color(0xFF8B5A5A).copy(alpha = 0.5f))
             )
 
-            // 4. THE NEW LOGO IMAGE! Add this right here:
+            // The Logo
             Image(
-                painter = painterResource(id = R.drawable.logo_h), // Make sure this matches your logo file name
+                painter = painterResource(id = R.drawable.logo_h),
                 contentDescription = "App Logo",
                 modifier = Modifier
-                    .align(Alignment.BottomStart) // This pins it to the bottom-left of the image header
-                    .padding(start = 15.dp, bottom = 50.dp) // Pushes it away from the absolute edges
+                    .align(Alignment.BottomStart)
+                    .padding(start = 25.dp, bottom = 50.dp) // Pushed closer to the left
                     .size(70.dp)
-            )// Adjust this number to make the logo bigger or smaller
+            )
         }
 
-        // --- Bottom Sheet Section ---
+        // --- 2. Bottom Sheet Section (White Form) ---
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -83,12 +111,14 @@ fun LoginScreen() {
                     .fillMaxSize()
                     .padding(horizontal = 30.dp, vertical = 40.dp)
             ) {
+                Spacer(modifier = Modifier.height(20.dp))
+
                 Text(
                     text = "Welcome, Admin!",
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
-                    modifier = Modifier.padding(bottom = 40.dp)
+                    modifier = Modifier.padding(bottom = 30.dp)
                 )
 
                 Text(
@@ -99,7 +129,7 @@ fun LoginScreen() {
                     modifier = Modifier.padding(bottom = 15.dp)
                 )
 
-                // --- Email Input (With Floating Label & Black Border) ---
+                // --- Email Input ---
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
@@ -118,7 +148,7 @@ fun LoginScreen() {
                     singleLine = true
                 )
 
-                // --- Password Input (With Floating Label & Black Border) ---
+                // --- Password Input ---
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
@@ -147,7 +177,7 @@ fun LoginScreen() {
                     modifier = Modifier.align(Alignment.End).padding(bottom = 30.dp)
                 )
 
-                // --- Login Button (With Drop Shadow Elevation) ---
+                // --- Login Button ---
                 Button(
                     onClick = { /* Handle Login Action */ },
                     modifier = Modifier
