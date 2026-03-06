@@ -339,7 +339,7 @@ fun ForgotPasswordScreen(onBackToLogin: () -> Unit, onSendResetLink: () -> Unit)
 @Composable
 fun OTPScreen(onBackToLogin: () -> Unit, onContinue: () -> Unit) {
     var otpValue by remember { mutableStateOf("") }
-    val focusRequesters = List(4) { FocusRequester() }
+    val focusRequesters = List(6) { FocusRequester() }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF1A1A1A))) {
 
@@ -392,18 +392,18 @@ fun OTPScreen(onBackToLogin: () -> Unit, onContinue: () -> Unit) {
                 )
 
                 Text(
-                    text = "Enter the 4-digit code sent to your email or phone number.",
-                    fontSize = 16.sp,
+                    text = "Enter the 6-digit code sent to your email or phone number.",
+                    fontSize = 10.sp,
                     color = Color.Gray,
                     modifier = Modifier.align(Alignment.Start).padding(bottom = 40.dp)
                 )
 
-                // --- 4 OTP Boxes ---
+                // --- 6 OTP Boxes ---
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 40.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    for (i in 0 until 4) {
+                    for (i in 0 until 6) {
                         OutlinedTextField(
                             value = if (otpValue.length > i) otpValue[i].toString() else "",
                             onValueChange = { newValue ->
@@ -415,7 +415,7 @@ fun OTPScreen(onBackToLogin: () -> Unit, onContinue: () -> Unit) {
                                         } else {
                                             currentOTP.add(newValue[0])
                                         }
-                                        if (i < 3) focusRequesters[i + 1].requestFocus()
+                                        if (i < 5) focusRequesters[i + 1].requestFocus()
                                     } else {
                                         if (i < otpValue.length) {
                                             currentOTP.removeAt(i)
@@ -426,7 +426,7 @@ fun OTPScreen(onBackToLogin: () -> Unit, onContinue: () -> Unit) {
                                 }
                             },
                             modifier = Modifier
-                                .size(60.dp)
+                                .size(55.dp)
                                 .focusRequester(focusRequesters[i]),
                             textStyle = TextStyle(
                                 fontSize = 24.sp,
